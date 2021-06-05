@@ -1,0 +1,197 @@
+
+/*--------------- 1ra Area: Codigo de Usuario -----------------------*/
+//-------> importaciones, paquetes
+package ejercicio1_compiladores;
+import java_cup.runtime.Symbol;
+import java.util.LinkedList;
+import java.util.Stack;
+import java.util.Iterator;
+
+//------> Codigo para el parser,variables, metodos
+parser code
+{:
+    StringBuilder contenido = new StringBuilder();
+    public static LinkedList<TError> TablaES = new LinkedList<TError>(); 
+
+    //Metodo al que se llama automaticamente ante algun error sintactico
+    public void syntax_error(Symbol s)
+    {   
+
+       
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+        
+        NewJFrame.Errores+="!!!!!!! Error Sintactico, Recuperado !!!!!!! ";
+        NewJFrame.Errores+="\nLexema: "+lexema;
+        NewJFrame.Errores+="\nFila: "+fila;
+        NewJFrame.Errores+="\nColumna: "+columna;
+
+        TError datos = new TError(lexema,fila,columna,"Error Sintactico","Caracter no esperado");
+        TablaES.add(datos);
+       
+        
+    }
+
+    //Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    {   
+       
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+        
+        NewJFrame.Errores+="\n\n!!!!!!! Error Sintactico, Panic Mode !!!!!!! ";
+        NewJFrame.Errores+="\ntLexema: "+lexema;
+        NewJFrame.Errores+="\nFila: "+fila;
+        NewJFrame.Errores+="\nColumna: "+columna;
+
+        TError datos = new TError(lexema,fila,columna,"Error Sintactico","Caracter no esperado");
+        TablaES.add(datos);
+     
+    }
+
+     public void recolector(Stack stack, String dato){
+        Iterator value = stack.iterator();
+        NewJFrame.Entradas+= dato +" valido: \n";
+        
+        while (value.hasNext()) {
+         try{
+            
+             NewJFrame.Entradas+=((java_cup.runtime.Symbol) value.next()).value.toString();
+             
+        }catch(Exception e){
+        }
+        }
+        NewJFrame.Entradas+= "\n\n";
+        
+    }
+
+
+:}
+
+action code
+{:
+
+
+:}
+
+
+terminal css_selector,css_propiedades,css_valor_propiedad,funcion,nombre_funcion,console,log,metodo_return,console_log;
+terminal id,declaraciones,string,booleano,condicion_if,condicion_else;
+terminal iteracion_while,iteracion_for;
+terminal html_r, html_h, html_b;
+terminal   condicion_js;
+terminal   nombre_etiqueta, atributo, valor_atributo, inicio_etiqueta, cierre_etiqueta,style,input,script,sentencias_js,parametro,op_aritmetico;
+
+///ETIQUETAS HEAD
+terminal etiquetas_head,etiqueta_title;
+
+terminal etiqueta_hr;
+terminal string num;
+
+
+terminal   semi,  times, uminus, ERROR;
+
+terminal   guion_bajo, lparen, rparen, lbrace, rbrace, lbrack, rbrack, semicolon, coma, dot, lt; //separadores
+terminal    eq, gt, not, comp, question, colon, plus, minus, mult, div, and, or, xor, mod, digito, palabra,arroba; //operadores
+terminal integer    number;        // our scanner provides numbers as integers
+
+
+non terminal  INICIO,E;
+non terminal  E_RAIZ,E_HEAD,E_BODY;
+non terminal  ETIQUETAS,ETIQUETA_APERTURA,ETIQUETA_CIERRE,CONTENIDO_ETIQUETA,TOKENS,ETIQUETAS_STYLE;
+non terminal  STYLE,CONTENIDO_STYLE,AGRUPACION_STYLE;
+non terminal  ATRIBUTO;
+
+
+
+start with INICIO;
+
+INICIO::=   E_RAIZ                                                                                  {: recolector(CUP$parser$stack,"raiz");:};
+E_RAIZ::=   lt html_r gt           E_HEAD E_BODY                 lt div html_r gt                     {:NewJFrame.SALIDA.append("se logro jflkajsldjdfasdf");:};
+E_HEAD::=   lt html_h gt          ETIQUETAS_STYLE               lt div html_h gt                     {:System.out.println("se logro");:}
+            |lt html_h gt                                         lt div html_h gt                   {: recolector(CUP$parser$stack,"head");:}
+            ;
+E_BODY::=   lt html_b gt                            lt div html_b gt                     {:NewJFrame.Entradas+="estructura etiqueta body correcta";:}
+            |lt html_b gt           ETIQUETAS                 lt div html_b gt           
+           ;
+
+ETIQUETAS ::=   ETIQUETA_APERTURA ETIQUETA_CIERRE                                                      {: recolector(CUP$parser$stack,"etiqueta");:}
+                |ETIQUETA_APERTURA CONTENIDO_ETIQUETA ETIQUETA_CIERRE                                  {: recolector(CUP$parser$stack,"etiqueta");:}
+                |lt input ATRIBUTO gt                                                                  {: recolector(CUP$parser$stack,"etiqueta");:}
+                |ETIQUETA_APERTURA ETIQUETAS ETIQUETA_CIERRE                                           {: recolector(CUP$parser$stack,"etiqueta");:}
+                |ETIQUETAS ETIQUETA_APERTURA ETIQUETAS ETIQUETA_CIERRE                                 {: recolector(CUP$parser$stack,"etiqueta");:}
+                |ETIQUETAS ETIQUETA_APERTURA ETIQUETA_CIERRE                                           {: recolector(CUP$parser$stack,"etiqueta");:}
+                |ETIQUETAS ETIQUETA_APERTURA CONTENIDO_ETIQUETA ETIQUETA_CIERRE                        {: recolector(CUP$parser$stack,"etiqueta");:}
+                |ETIQUETAS lt input ATRIBUTO gt                                                        {: recolector(CUP$parser$stack,"etiqueta");:}
+                |ETIQUETAS lt etiqueta_hr ATRIBUTO gt                                                  {: recolector(CUP$parser$stack,"etiqueta");:}
+                
+               
+                  ;
+
+
+
+
+ETIQUETA_APERTURA   ::=  lt nombre_etiqueta gt                                                                  {: recolector(CUP$parser$stack,"Etiqueta Apertura");:}
+                         | lt nombre_etiqueta  ATRIBUTO gt                                                      {: recolector(CUP$parser$stack,"Etiqueta Apertura");:}
+                         ;
+
+
+
+ETIQUETA_CIERRE     ::=  lt div nombre_etiqueta gt
+                    ;
+
+
+
+ATRIBUTO   ::=  atributo eq valor_atributo
+                |ATRIBUTO   atributo eq valor_atributo
+                ;
+
+
+
+ETIQUETAS_STYLE::=   lt etiqueta_title gt  CONTENIDO_ETIQUETA lt div etiqueta_title gt
+                   | lt etiquetas_head   ATRIBUTO gt 
+                   |ETIQUETAS_STYLE lt style ATRIBUTO gt   AGRUPACION_STYLE  lt div style gt
+                   |ETIQUETAS_STYLE lt etiquetas_head   ATRIBUTO gt 
+                   |ETIQUETAS_STYLE  lt etiqueta_title gt  CONTENIDO_ETIQUETA lt div etiqueta_title gt
+                   |ETIQUETAS_STYLE  lt etiqueta_title ATRIBUTO gt  CONTENIDO_ETIQUETA lt div etiqueta_title gt
+                   ;
+
+
+
+
+AGRUPACION_STYLE::= css_selector lbrace  CONTENIDO_STYLE rbrace
+                    |AGRUPACION_STYLE css_selector lbrace  CONTENIDO_STYLE rbrace
+                 ;
+
+
+CONTENIDO_STYLE::=  css_propiedades colon css_valor_propiedad semicolon
+                  |CONTENIDO_STYLE css_propiedades colon css_valor_propiedad semicolon
+                  ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                           
+CONTENIDO_ETIQUETA::= TOKENS
+                      | CONTENIDO_ETIQUETA TOKENS ;                          
+
+
+
+TOKENS::=        semi|  times| uminus|   guion_bajo | lparen
+                |rparen| lbrace| rbrace| lbrack| rbrack| semicolon| coma
+                | dot| eq| gt| not| comp| question| colon| plus| minus
+                | mult| div| and| or| xor| mod| digito| palabra|arroba  
+                    ;
+

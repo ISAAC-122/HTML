@@ -1,0 +1,1 @@
+java -jar ../../dist/lib/java-cup-11b.jar -interface -parser Parser parser.cup
